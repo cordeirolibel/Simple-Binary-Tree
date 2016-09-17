@@ -34,6 +34,109 @@ public:
         return fd;
     }
 
+    //deleta nó de informação _info, returna 1 se bem sucedido e -1 se for folha e 0 para não existe
+    int deleteNo(int _info)
+    {
+        cout << info <<endl;
+        //sou o nó a ser deletado
+        if(_info==info)
+        {
+            //se filha fe existir
+            if(fe!=NULL)
+            {
+                No* tmp_fe = fe;
+                No* tmp_fd = fd;
+                //nó atual passa a ser a filha fe
+                info = tmp_fe->getInfo();
+                fe = tmp_fe->getFE();
+                fd = tmp_fe->getFD();
+                //retira as filhas de fe e a deleta
+                tmp_fe->fd = NULL;
+                tmp_fe->fe = NULL;
+                delete tmp_fe;
+                //adiciona a filha da direita se existir
+                if(tmp_fd!=NULL)
+                    addFilha(tmp_fd);
+                return 1;
+            }
+            //se somente a filha fd existir
+            else if(fd!=NULL)
+            {
+                No* tmp_fd = fd;
+                //nó atual passa a ser a filha fd
+                info = tmp_fd->getInfo();
+                fe = tmp_fd->getFE();
+                fd = tmp_fd->getFD();
+                //retira as filhas de fd e a deleta
+                tmp_fd->fd = NULL;
+                tmp_fd->fe = NULL;
+                delete tmp_fd;
+                return 1;
+            }
+            //Magic!
+            else
+            {
+                delete this;//BOOOOM!!!
+                return -1;
+            }
+        }
+        //Alguem da direita vai ser deletado
+        else if(_info < info)
+        {
+            if(fe==NULL)
+                return 0;
+            int resultado;
+            resultado = fe->deleteNo(_info);
+            //se fe era uma folha
+            if(resultado == -1)
+            {
+                fe = NULL;
+                return 1;
+            }
+            else
+                return resultado;
+        }
+        //Alguem da esquerda vai ser deletado
+        else if(info < _info)
+        {
+            if(fd == NULL)
+                return 0;
+            int resultado;
+            resultado = fd->deleteNo(_info);
+            //se fd era uma folha
+            if(resultado == -1)
+            {
+                fd = NULL;
+                return 1;
+            }
+            else
+                return resultado;
+        }
+        else
+            return 0;
+    }
+    void addFilha(No* filha)
+    {
+        if(filha == NULL)
+            return;
+        //esquerda
+        if(filha->getInfo() < info)
+        {
+            if(fe==NULL)
+                fe = filha;
+            else
+                fe->addFilha(filha);
+        }
+        //direita
+        else if(info < filha->getInfo())
+        {
+            if(fd==NULL)
+                fd = filha;
+            else
+                fd->addFilha(filha);
+        }
+    }
+
     void addFilha(int _info)
     {
         //esquerda
@@ -182,6 +285,15 @@ int main()
     arvore->imprime();
     cout << endl;
     imprimeArvorePorNiveis(&arvore);
+
+    //deletando nó do usuario
+    int del;
+    cin >> del;
+    if(arvore->deleteNo(del)==0)
+        cout << "Nó não existe tche!" << endl;
+    else
+        imprimeArvorePorNiveis(&arvore);
+
     delete arvore;
 
     return 0;
