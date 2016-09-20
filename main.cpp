@@ -1,6 +1,10 @@
 #include <iostream>
+#include <cstdlib>
 #include <locale.h>
+#include <limits>
 #include <math.h>
+
+#define LINUX 1
 
 using namespace std;
 
@@ -34,11 +38,10 @@ public:
         return fd;
     }
 
-    //deleta n� de informa��o _info, returna 1 se bem sucedido e -1 se for folha e 0 para n�o existe
+    //deleta nó de informação _info, returna 1 se bem sucedido e -1 se for folha e 0 para não existe
     int deleteNo(int _info)
     {
-        cout << info <<endl;
-        //sou o n� a ser deletado
+        //sou o nó a ser deletado
         if(_info==info)
         {
             //se filha fe existir
@@ -46,7 +49,7 @@ public:
             {
                 No* tmp_fe = fe;
                 No* tmp_fd = fd;
-                //n� atual passa a ser a filha fe
+                //nó atual passa a ser a filha fe
                 info = tmp_fe->getInfo();
                 fe = tmp_fe->getFE();
                 fd = tmp_fe->getFD();
@@ -63,7 +66,7 @@ public:
             else if(fd!=NULL)
             {
                 No* tmp_fd = fd;
-                //n� atual passa a ser a filha fd
+                //nó atual passa a ser a filha fd
                 info = tmp_fd->getInfo();
                 fe = tmp_fd->getFE();
                 fd = tmp_fd->getFD();
@@ -137,7 +140,7 @@ public:
         }
     }
 
-    void addFilha(int _info)
+    int addFilha(int _info)
     {
         //esquerda
         if(_info < info)
@@ -145,7 +148,7 @@ public:
             if(fe==NULL)
                 fe = new No(_info);
             else
-                fe->addFilha(_info);
+                return fe->addFilha(_info);
         }
         //direita
         else if(info < _info)
@@ -153,20 +156,25 @@ public:
             if(fd==NULL)
                 fd = new No(_info);
             else
-                fd->addFilha(_info);
+                return fd->addFilha(_info);
         }
+        else
+        {
+            return 0;
+        }
+        return  1;
     }
 
     void imprime()
     {
-        cout << "N�: " << this->getInfo();
+        cout << "Nó: " << this->getInfo();
         this->getFE() != NULL ? (cout << " FE: " << (this->getFE())->getInfo()) : (cout << " FE: -1 ");
         this->getFD() != NULL ? (cout << " FD: " << (this->getFD())->getInfo()) : (cout << " FD: -1 ");
         cout << endl;
 
         if(fe!=NULL)
             fe->imprime();
-        //cout << info << endl;
+
         if(fd!=NULL)
             fd->imprime();
     }
@@ -176,6 +184,60 @@ public:
     }
 };
 
+
+int lerEntrada(const char* print)
+{
+    int input = -1;
+    bool valid= false;
+    do
+    {
+        cout << print;
+        cin >> input;
+        if (cin.good())
+        {
+            valid = true;
+        }
+        else
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(),'\n');
+            cout << " Entrada inválida!" << endl;
+        }
+    }
+    while (!valid);
+    return (input);
+}
+
+//imprime o menu podendo ou não imprimir as opções
+void imprimeMenu(bool tudo=true)
+{
+    if(LINUX)
+        system("clear");
+    else
+        system("cls");
+    cout  << "   _____ _                 _        ____  _                          _______            " << endl;
+    cout  << "  / ____(_)               | |      |  _ \\(_)                        |__   __|           " << endl;
+    cout  << " | (___  _ _ __ ___  _ __ | | ___  | |_) |_ _ __   __ _ _ __ _   _     | |_ __ ___  ___ " << endl;
+    cout  << "  \\___ \\| | '_ ` _ \\| '_ \\| |/ _ \\ |  _ <| | '_ \\ / _` | '__| | | |    | | '__/ _ \\/ _ \\" << endl;
+    cout  << "  ____) | | | | | | | |_) | |  __/ | |_) | | | | | (_| | |  | |_| |    | | | |  __/  __/" << endl;
+    cout  << " |_____/|_|_| |_| |_| .__/|_|\\___| |____/|_|_| |_|\\__,_|_|   \\__, |    |_|_|  \\___|\\___|" << endl;
+    cout  << "                    | |                                       __/ |                     " << endl;
+    cout  << "                    |_|                                      |___/                      " << endl;
+    cout << "========================================================================================" << endl;
+
+    if(tudo)
+    {
+        cout << " Selecione uma opção:" << endl;
+        cout << "   1. Inserir nó" << endl;
+        cout << "   2. Remover nó" << endl;
+        cout << "   3. Imprime árvore" << endl;
+        cout << "   0. Sair" << endl;
+        cout << "=========================================================================================" << endl;
+        cout << ">>";
+    }
+}
+
+
 void imprimeArvorePorNiveis(No** raiz)
 {
     No* atual;
@@ -184,7 +246,7 @@ void imprimeArvorePorNiveis(No** raiz)
 
     if((*raiz)==NULL)
     {
-        cout << "�rvore vazia!" << endl;
+        cout << "Árvore vazia!" << endl;
     }
     else
     {
@@ -235,7 +297,7 @@ void imprimeArvorePorNiveis(No** raiz)
                 if(atual != NULL)
                 {
                     fim = false;
-                    cout << "N�: " << atual->getInfo();
+                    cout << "Nó: " << atual->getInfo();
                     atual->getFE() != NULL ? (cout << " FE: " << (atual->getFE())->getInfo()) : (cout << " FE: -1 ");
                     atual->getFD() != NULL ? (cout << " FD: " << (atual->getFD())->getInfo()) : (cout << " FD: -1 ");
                     cout << endl;
@@ -248,7 +310,14 @@ void imprimeArvorePorNiveis(No** raiz)
 
 int main()
 {
-    setlocale(LC_ALL, "Portuguese");
+    char ent;
+    int res, ph;
+
+
+    if(LINUX)
+        setlocale(LC_ALL, "pt_BR_utf8");
+    else
+        setlocale(LC_ALL, "Portuguese");
 
     /*
                 25
@@ -257,17 +326,18 @@ int main()
     5   15 22  24  27  29 35  43
 
     Raiz: 25 FE: 20 FD: 30
-    N� 20: FE: 10 FD: 23
-    N� 30: FE: 28 FD: 40
-    N� 10: FE: 5 FD: 15
-    N� 23: FE: -1 FD: -1
-    N� 28: FE: -1 FD: -1
-    N� 40: FE: -1 FD: -1
-    N� 5: FE: -1 FD:-1
-    N� 15: FE: -1 FD: -1
+    Nó 20: FE: 10 FD: 23
+    Nó 30: FE: 28 FD: 40
+    Nó 10: FE: 5 FD: 15
+    Nó 23: FE: -1 FD: -1
+    Nó 28: FE: -1 FD: -1
+    Nó 40: FE: -1 FD: -1
+    Nó 5: FE: -1 FD:-1
+    Nó 15: FE: -1 FD: -1
 
     */
-    No *arvore = new No(25);
+    No *arvore = NULL;
+    /*
     arvore->addFilha(20);
     arvore->addFilha(10);
     arvore->addFilha(5);
@@ -282,17 +352,83 @@ int main()
     arvore->addFilha(40);
     arvore->addFilha(35);
     arvore->addFilha(43);
-    arvore->imprime();
-    cout << endl;
-    imprimeArvorePorNiveis(&arvore);
+    */
 
-    //deletando n� do usuario
-    int del;
-    cin >> del;
-    if(arvore->deleteNo(del)==0)
-        cout << "N� n�o existe tche!" << endl;
-    else
-        imprimeArvorePorNiveis(&arvore);
+    while(1)
+    {
+        imprimeMenu();
+
+        cin >> ent;
+
+        switch(ent)
+        {
+        case '0':
+            return 0;
+            break;
+        /// Inserir nó
+        case '1':
+            imprimeMenu(false);
+            cout << " 1. Adicionar nó" << endl;
+
+            if(arvore ==  NULL)
+            {
+                arvore = new No(lerEntrada("  Valor: "));
+                cout << "  Nó adicionado!" << endl;
+            }
+            else
+            {
+                if(arvore->addFilha(lerEntrada("  Valor: ")) == 1)
+                    cout << "  Nó adicionado!" << endl;
+                else
+                    cout << "  Nó não foi adicionado,  nó informado já faz parte da árvore!" << endl;
+            }
+
+            if(LINUX)
+                system("read -p \"\nPressione enter para sair\" saindo");
+            else
+                system("pause");
+            break;
+        /// Remover nó
+        case '2':
+            imprimeMenu(false);
+            cout << " 2. Remover nó" << endl;
+            if(arvore ==  NULL)
+            {
+                cout << "  Árvore vazia!" <<endl;
+            }
+            else
+            {
+                res = lerEntrada("  Valor: ");
+                res  = arvore->deleteNo(res);
+                if(res == 1)
+                    cout << "  Nó removido!" << endl;
+                else  if(res == 0)
+                    cout << "  Nó não foi removido,  nó informado não existe!" <<endl;
+                else
+                {
+                    arvore = NULL;
+                }
+            }
+
+            if(LINUX)
+                system("read -p \"\nPressione enter para sair\" saindo");
+            else
+                system("pause");
+            break;
+        /// Imprimir árvore
+        case '3':
+            imprimeMenu(false);
+            imprimeArvorePorNiveis(&arvore);
+            if(LINUX)
+                system("read -p \"\nPressione enter para sair\" saindo");
+            else
+                system("pause");
+            break;
+        /// Entrada inválida
+        default:
+            break;
+        }
+    }
 
     delete arvore;
 
